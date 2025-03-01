@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 بوم نقاشی - تشخیص عدد</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        body {
+            background-color: #1a1b43;
+            color: #fff;
+            text-align: center;
+            font-family: "Roboto", sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        canvas {
+            border: 2px solid #000;
+            background: #000;
+            cursor: crosshair;
+            display: block;
+            margin: auto;
+        }
+
+        .btn {
+            margin-top: 10px;
+            width: 150px;
+        }
+
+        .size-control {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .size-control label {
+            margin-right: 10px;
+        }
+
+        .prediction-section {
+            margin-top: 30px;
+            font-size: 32px;
+            /* اندازه فونت بزرگ */
+            color: #00e676;
+            /* رنگ سبز برای عدد پیش‌بینی شده */
+        }
+
+        .tools {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h4>🎨 بوم نقاشی - تشخیص عدد</h4>
+        <canvas id="myCanvas" width="400" height="400"></canvas>
+
+        <div class="tools">
+            <div class="size-control">
+                <label for="brushSize">سایز قلم:</label>
+                <input type="range" id="brushSize" min="1" max="50" value="5" onchange="changeBrushSize(this.value)">
+            </div>
+            <button class="btn waves-effect waves-light deep-purple darken-3" onclick="saveImage()">💾 ذخیره و
+                ارسال</button>
+            <button class="btn waves-effect waves-light red darken-3" onclick="clearCanvas()">🗑️ پاک کردن</button>
+        </div>
+
+        <div class="prediction-section" id="predictionResult">عدد پیش‌بینی شده: -</div>
+    </div>
+
+    <script src="{% static 'jQuery.js' %}"></script>
+    <script>
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let painting = false;
+        let brushSize = 5; // اندازه پیش‌فرض قلم
+
+        function startPosition(e) {
+            painting = true;
+            draw(e);
+        }
+
+        function endPosition() {
+            painting = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!painting) return;
+            ctx.lineWidth = brushSize; // استفاده از اندازه قلم
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "white"; // رنگ قلم
+
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        }
+
+        canvas.addEventListener("mousedown", startPosition);
+        canvas.addEventListener("mouseup", endPosition);
+        canvas.addEventListener("mousemove", draw);
+
+        function saveImage() {
+            const canvas = document.getElementById("myCanvas");
+            canvas.toBlob((blob) => {
+                let formData = new FormData();
+                formData.append("image", blob, "image.png");
+
+                $.ajax({
+                    url: "http://localhost:8000/api/predict/",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        console.log("✅ درخواست ارسال شد!");
+                        $("#predictionResult").text(`عدد پیش‌بینی شده: ${data.prediction}`);
+                        M.toast({ html: "✅ تصویر ارسال شد!", classes: "green" });
+                    },
+                    error: function (xhr, status, error) {
+                        M.toast({ html: "❌ خطا در ارسال تصویر!", classes: "red" });
+                    }
+                });
+            }, "image/png");
+        }
+
+
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById("predictionResult").innerText = "عدد پیش‌بینی شده: -";
+        }
+
+        function changeBrushSize(size) {
+            brushSize = size;
+        }
+    </script>
+</body>
+
+</html>
