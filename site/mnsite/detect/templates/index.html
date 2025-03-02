@@ -1,11 +1,11 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 بوم نقاشی - تشخیص عدد</title>
+    <title>MNist Handwritten number detection</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <style>
         body {
@@ -46,9 +46,7 @@
         .prediction-section {
             margin-top: 30px;
             font-size: 32px;
-            /* اندازه فونت بزرگ */
             color: #00e676;
-            /* رنگ سبز برای عدد پیش‌بینی شده */
         }
 
         .tools {
@@ -60,20 +58,19 @@
 <body>
 
     <div class="container">
-        <h4>🎨 بوم نقاشی - تشخیص عدد</h4>
+        <h4>MNist Handwritten number detection🔢</h4>
         <canvas id="myCanvas" width="400" height="400"></canvas>
 
         <div class="tools">
             <div class="size-control">
-                <label for="brushSize">سایز قلم:</label>
+                <label for="brushSize">Brush size:</label>
                 <input type="range" id="brushSize" min="1" max="50" value="5" onchange="changeBrushSize(this.value)">
             </div>
-            <button class="btn waves-effect waves-light deep-purple darken-3" onclick="saveImage()">💾 ذخیره و
-                ارسال</button>
-            <button class="btn waves-effect waves-light red darken-3" onclick="clearCanvas()">🗑️ پاک کردن</button>
+            <button class="btn waves-effect waves-light deep-purple darken-3" onclick="saveImage()">Send 🔮</button>
+            <button class="btn waves-effect waves-light red darken-3" onclick="clearCanvas()">Remove 🗑️</button>
         </div>
 
-        <div class="prediction-section" id="predictionResult">عدد پیش‌بینی شده: -</div>
+        <div class="prediction-section" id="predictionResult">Predicted Number: -</div>
     </div>
 
     <script src="{% static 'jQuery.js' %}"></script>
@@ -82,7 +79,7 @@
         const ctx = canvas.getContext("2d");
 
         let painting = false;
-        let brushSize = 5; // اندازه پیش‌فرض قلم
+        let brushSize = 40;
 
         function startPosition(e) {
             painting = true;
@@ -96,9 +93,9 @@
 
         function draw(e) {
             if (!painting) return;
-            ctx.lineWidth = brushSize; // استفاده از اندازه قلم
+            ctx.lineWidth = brushSize; 
             ctx.lineCap = "round";
-            ctx.strokeStyle = "white"; // رنگ قلم
+            ctx.strokeStyle = "white";
 
             ctx.lineTo(e.offsetX, e.offsetY);
             ctx.stroke();
@@ -123,12 +120,12 @@
                     processData: false,
                     contentType: false,
                     success: function (data) {
-                        console.log("✅ درخواست ارسال شد!");
-                        $("#predictionResult").text(`عدد پیش‌بینی شده: ${data.prediction}`);
-                        M.toast({ html: "✅ تصویر ارسال شد!", classes: "green" });
+                        console.log("Request has been sent! ✅");
+                        $("#predictionResult").text(`Predicted Number: ${data.prediction}`);
+                        M.toast({ html: "Image was sent! ✅", classes: "green" });
                     },
                     error: function (xhr, status, error) {
-                        M.toast({ html: "❌ خطا در ارسال تصویر!", classes: "red" });
+                        M.toast({ html: "Couldn't send the image! ❌", classes: "red" });
                     }
                 });
             }, "image/png");
@@ -138,7 +135,7 @@
 
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            document.getElementById("predictionResult").innerText = "عدد پیش‌بینی شده: -";
+            document.getElementById("predictionResult").innerText = "Predicted Number: -";
         }
 
         function changeBrushSize(size) {
