@@ -17,7 +17,6 @@ def predict(request):
         background = Image.new('RGBA', image.size, (0, 0, 0, 255))
         image_with_background = Image.alpha_composite(background, image).convert('L')
         img = image_with_background.resize((28, 28))
-        img = ImageOps.invert(img)
         img = np.array(img).reshape(1, -1)
         scaler = apps.get_app_config('apiserver').scaler
         model = apps.get_app_config('apiserver').model
